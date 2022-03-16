@@ -1,0 +1,1 @@
+* mnist.csv：55000 rows, first 784 columns represent pixels, range from 0 to 10. Last 10 columns are one-hot labels.
