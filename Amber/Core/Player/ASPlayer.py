@@ -2,7 +2,6 @@ import time
 
 from Amber.Core.Player.Player import *
 from Amber.Core.Comm.Peer import Peer
-from Amber.Core.Utils import task_async
 
 
 def auto_to_tensor_as(arg_indices=None):
