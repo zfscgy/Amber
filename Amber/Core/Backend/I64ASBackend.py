@@ -3,7 +3,7 @@ from Amber.Core.Backend.NumpyBackend import NumpyBackend
 
 
 class I64ASBackend(ASBackend, NumpyBackend):
-    def __init__(self, precision: int = 21, seed: int = np.random.randint(0, 2**63-1)):
+    def __init__(self, precision: int = 21, seed: int = np.random.randint(0, 2**63-1, dtype=np.int64)):
         self.precision = precision
         self.bitlen = 64
         NumpyBackend.__init__(self, seed, np.int64)
@@ -32,7 +32,7 @@ class I64ASBackend(ASBackend, NumpyBackend):
 
 
 class I64RTASBackend(RTASBackend, I64ASBackend):
-    def __init__(self, precision: int = 21, seed: int = np.random.randint(0, 2**63-1)):
+    def __init__(self, precision: int = 21, seed: int = np.random.randint(0, 2**63-1, dtype=np.int64)):
         I64ASBackend.__init__(self, precision, seed)
         self.permutation_generator = np.random.default_rng(seed)
 

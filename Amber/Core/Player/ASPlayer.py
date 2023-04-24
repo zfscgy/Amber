@@ -245,8 +245,8 @@ class ASPlayer(Player):
                 maybe_overflow_elems = self.backend.find_indices(self.backend.greater(new_val, 2 ** (bitlen - 3)))
                 maybe_underflow_elems = self.backend.find_indices(self.backend.greater(- 2 ** (bitlen - 3), new_val))
                 """
-                maybe_overflow_elems = self.backend.greater(new_val, 2 ** (bitlen - 3))
-                maybe_underflow_elems = self.backend.greater(- 2 ** (bitlen - 3), new_val)
+                maybe_overflow_elems = self.backend.greater(new_val, 2 ** (bitlen - 3)).astype(np.uint8)
+                maybe_underflow_elems = self.backend.greater(- 2 ** (bitlen - 3), new_val).astype(np.uint8)
                 self.peer.send(self.other_player, "overflow, underflow",
                     (self.backend.pack_bits(maybe_overflow_elems), self.backend.pack_bits(maybe_underflow_elems)))
             else:
@@ -254,10 +254,17 @@ class ASPlayer(Player):
                 maybe_underflow_elems = self.backend.unpack_bits(maybe_underflow_elems)
                 maybe_overflow_elems = self.backend.unpack_bits(maybe_overflow_elems)
 
-            new_overflow_vals = self.backend.sub(self.backend.select_by_indicator(new_val, maybe_overflow_elems), 2 ** (bitlen - 3))
-            self.backend.set_by_indicator(new_val, maybe_overflow_elems, new_overflow_vals)
-            new_underflow_vals = self.backend.add(self.backend.select_by_indicator(new_val, maybe_underflow_elems), 2 ** (bitlen - 3))
-            self.backend.set_by_indicator(new_val, maybe_underflow_elems, new_underflow_vals)
+            if len(new_val.shape) != 0:
+                new_overflow_vals = self.backend.sub(self.backend.select_by_indicator(new_val, maybe_overflow_elems), 2 ** (bitlen - 3))
+                self.backend.set_by_indicator(new_val, maybe_overflow_elems, new_overflow_vals)
+                new_underflow_vals = self.backend.add(self.backend.select_by_indicator(new_val, maybe_underflow_elems), 2 ** (bitlen - 3))
+                self.backend.set_by_indicator(new_val, maybe_underflow_elems, new_underflow_vals)
+            else:
+                if maybe_overflow_elems == 1:
+                    new_val -= 2 ** (bitlen - 3)
+                if maybe_underflow_elems == 1:
+                    new_val += 2 ** (bitlen - 3)
+
             return self.tfactory.shared(self.backend.recode(new_val))
 
         triple = self._get_triple(f"{mul_op.__qualname__}", mul_op, tensor0.shape, tensor1.shape)

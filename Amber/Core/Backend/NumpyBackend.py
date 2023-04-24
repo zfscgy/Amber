@@ -4,7 +4,7 @@ from Amber.Core.Backend.Backend import *
 
 
 class NumpyBackend(Backend):
-    def __init__(self, seed: int = np.random.randint(0, 2**63-1), dtype=np.float):
+    def __init__(self, seed: int = np.random.randint(0, 2**63-1, dtype=np.int64), dtype=np.float):
         self.default_rng = np.random.default_rng(seed)
         self.dtype = dtype
         self.rngs = dict()
@@ -24,7 +24,7 @@ class NumpyBackend(Backend):
     def unpack_bits(self, packed: tuple):
         bits, shape = packed
         # The bits are multiples of 8, hence needs to truncate to remove extra data.
-        arr = np.unpackbits(bits)[:np.prod(shape)]
+        arr = np.array(np.unpackbits(bits))[:int(np.prod(shape))]
         return arr.reshape(shape).astype(np.bool)
 
     def random_int(self, shape: Tuple[int, ...] = None, name: str=None):
@@ -74,7 +74,7 @@ class NumpyBackend(Backend):
         return np.take(x, indices, axis)
 
     def select_by_indicator(self, x: np.ndarray, indicator: np.ndarray):
-        return x[indicator]
+        return x[indicator.astype(np.bool)]
 
     def select_by_indices(self, x: np.ndarray, indices: np.ndarray):
         if len(indices) == 0:
